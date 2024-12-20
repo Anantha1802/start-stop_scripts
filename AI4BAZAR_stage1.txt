@@ -1,0 +1,45 @@
+start :
+
+#!/bin/bash
+export BASE_DIR="/u01/app/visys/ai4baaazarstage1/ai4bazzar"
+
+export FIRST_APP_FRONTEND="/u01/app/visys/ai4baaazarstage1/ai4bazzar/frontend"
+export FIRST_APP_BACKEND="/u01/app/visys/ai4baaazarstage1/ai4bazzar/backend"
+export FIRST_APP_FLAG="int_dashboard"
+export LOG_DIR="/u01/app/visys/ai4baaazarstage1/ai4bazzar/log"
+
+cd ${FIRST_APP_BACKEND}
+node index.js 1>${LOG_DIR}/${FIRST_APP_FLAG}_node.out 2>${LOG_DIR}/${FIRST_APP_FLAG}_node.err &
+sleep 1
+
+cat ${LOG_DIR}/${FIRST_APP_FLAG}_node.out
+
+echo " "
+export PORT=3001
+cd ${FIRST_APP_FRONTEND}
+npm start 1>${LOG_DIR}/${FIRST_APP_FLAG}_npm.out 2>${LOG_DIR}/${FIRST_APP_FLAG}_npm.err &
+sleep 1
+cat ${LOG_DIR}/${FIRST_APP_FLAG}_npm.out
+
+
+stop:
+
+#!/bin/bash
+export BASE_DIR="/u01/app/visys/ai4baaazarstage1/ai4bazzar"
+export FIRST_APP_FRONTEND="/u01/app/visys/ai4baaazarstage1/ai4bazzar/frontend"
+export FIRST_APP_BACKEND="/u01/app/visys/ai4baaazarstage1/ai4bazzar/backend"
+export FIRST_APP_FLAG="int_dashboard"
+export LOG_DIR="/u01/app/visys/ai4baaazarstage1/ai4bazzar/log"
+
+#cd ${FIRST_APP_BACKEND}
+#node index.js 1>${LOG_DIR}/${FIRST_APP_FLAG}_stop_node.out 2>${LOG_DIR}/${FIRST_APP_FLAG}_stop_node.err &
+
+cd ${FIRST_APP_FRONTEND}
+npm stop 1>${LOG_DIR}/${FIRST_APP_FLAG}_stop_npm.out 2>${LOG_DIR}/${FIRST_APP_FLAG}_stop_npm.err &
+
+
+NODE_PID=$(netstat -nap |grep 5001|grep LISTEN|awk {'print $NF'}|cut -d"/" -f1)
+NPM_PID=$(netstat -nap |grep 3001|grep LISTEN|awk {'print $NF'}|cut -d"/" -f1)
+
+[ ! -z ${NODE_PID} ] && kill -9 ${NODE_PID}
+[ ! -z ${NPM_PID} ] && kill -9 ${NPM_PID}
